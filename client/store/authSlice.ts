@@ -7,7 +7,7 @@ interface Credit {
 }
 
 interface AuthState {
-  user: { id: string; name: string; email: string; credit: Credit,trialEndAt:Date,plan:string } | null;
+  user: { id: string; name: string; email: string; credit: Credit,trialEndAt:Date,plan:string,services:string[] } | null;
   loading: boolean;
   error: string | null;
   accessToken: string;
@@ -38,7 +38,7 @@ export const signIn = createAsyncThunk(
 export const signUp = createAsyncThunk(
   "auth/signUp",
   async (
-    data: { name: string; email: string; password: string },
+    data: { name: string; email: string; password: string,role:string,services:string },
     { rejectWithValue },
   ) => {
     try {
@@ -71,6 +71,19 @@ export const refreshToken = createAsyncThunk(
     try {
       const response = await api.post("/refresh-token", {});
       return response.data;
+    } catch (err: any) {
+      return rejectWithValue(
+        err.response?.data?.message || "Token refresh failed",
+      );
+    }
+  },
+);
+export const updateUserServices = createAsyncThunk(
+  "auth/update-user-services",
+  async (data, { rejectWithValue }) => {
+    try {
+      const response = await api.post("/update-service", data);
+      return response.data.data;
     } catch (err: any) {
       return rejectWithValue(
         err.response?.data?.message || "Token refresh failed",
@@ -175,7 +188,23 @@ const authSlice = createSlice({
       .addCase(signOut.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload as string;
-      });
+      })
+      .addCase(updateUserServices.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(
+        updateUserServices.fulfilled,
+        (state, action: PayloadAction<AuthState["user"]>) => {
+          state.loading = false;
+          console.log(action.payload)
+          state.user = action.payload;
+        },
+      )
+      .addCase(updateUserServices.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload as string;
+      }); 
   },
 });
 

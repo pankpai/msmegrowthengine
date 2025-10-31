@@ -191,7 +191,6 @@ export const handleGetSubscriptionByUserId = asyncHandler(
   async (req: Request, res: Response) => {
     const userId = req.user.id;
     const objectUserId = new mongoose.Types.ObjectId(userId)
-    console.log(typeof userId);
     if (!userId) {
       return res.status(400).json({
         success: false,

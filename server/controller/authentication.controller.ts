@@ -22,7 +22,8 @@ const COOKIE_OPTIONS = {
 function generateAccessToken(user: {
   id: string;
   email: string;
-  clientId: string;
+  role?: string;
+  clientId?: string;
 }) {
   return jwt.sign(user, JWT_SECRET, { expiresIn: ACCESS_TOKEN_EXPIRES_IN });
 }
@@ -30,7 +31,8 @@ function generateAccessToken(user: {
 function generateRefreshToken(user: {
   id: string;
   email: string;
-  clientId: string;
+  role?: string;
+  clientId?: string;
 }) {
   return jwt.sign(user, REFRESH_SECRET, {
     expiresIn: REFRESH_TOKEN_EXPIRES_IN,
@@ -47,7 +49,7 @@ export const signUp = async (
   next: NextFunction,
 ) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, role, services } = req.body;
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
@@ -55,15 +57,23 @@ export const signUp = async (
         .json(new ApiResponse(false, "Email Id is already exist"));
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashedPassword });
+    const user = await User.create({
+      name,
+      email,
+      password: hashedPassword,
+      role: services === "influencer" ? role : undefined,
+      services,
+    });
     const accessToken = generateAccessToken({
       id: user._id.toString(),
       email: user.email,
+      role: user.role,
       clientId: user.clientId,
     });
     const refreshToken = generateRefreshToken({
       id: user._id.toString(),
       email: user.email,
+      role: user.role,
       clientId: user.clientId,
     });
     setRefreshCookie(res, refreshToken);
@@ -72,7 +82,13 @@ export const signUp = async (
       message: "User registered",
       accessToken,
       refreshToken,
-      user: { id: user._id, name: user.name, email: user.email },
+      user: {
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        services: user.services,
+      },
     });
   } catch (err) {
     next(err);
@@ -101,11 +117,13 @@ export const signIn = async (
     const accessToken = generateAccessToken({
       id: user._id.toString(),
       email: user.email,
+      role: user.role,
       clientId: user.clientId,
     });
     const refreshToken = generateRefreshToken({
       id: user._id.toString(),
       email: user.email,
+      role: user.role,
       clientId: user.clientId,
     });
     setRefreshCookie(res, refreshToken);
@@ -118,7 +136,8 @@ export const signIn = async (
         id: user._id,
         name: user.name,
         email: user.email,
-        clientId: user.clientId,
+        role: user.role,
+        services: user.services,
       },
     });
   } catch (err) {
@@ -136,6 +155,7 @@ export const handleGetuserInfo = asyncHandler(
     res.status(200).json(new ApiResponse(true, "", userInfo));
   },
 );
+
 export const signOut = asyncHandler(async (req: Request, res: Response) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,
@@ -160,13 +180,15 @@ export const refreshAccessToken = async (
         .json({ success: false, message: "Refresh token missing" });
     }
     const decoded = jwt.verify(refreshToken, REFRESH_SECRET) as {
-      clientId: string;
       id: string;
       email: string;
+      role?: string;
+      clientId?: string;
     };
     const accessToken = generateAccessToken({
       id: decoded.id,
       email: decoded.email,
+      role: decoded.role,
       clientId: decoded.clientId,
     });
     res.status(200).json({ success: true, accessToken });
@@ -177,20 +199,78 @@ export const refreshAccessToken = async (
   }
 };
 
-export const updateCreditofUser = asyncHandler(
-  async (req: Request, res: Response) => {
-    const { id, email, credit } = req.body;
-    const user = await User.findById(id);
-    if (!user) {
-      return res
-        .status(404)
-        .json(new ApiResponse(false, "Invalid request or user not exist"));
-    }
-    if (user.credit.remainingCredit < credit) {
-      return res.status(400).json(new ApiResponse(false, "your credit is ended!"));
-    }
-    user.credit.remainingCredit = user?.credit?.remainingCredit - credit;
-    await user.save();
-    res.status(200).json(new ApiResponse(true, "Token Deduct"));
-  },
-);
+export const updateServiceshandler = asyncHandler(async(req:Request,res:Response)=>{
+  const {services,role} = req.body
+  const userId = req.user.id;
+  const user = await User.findById(userId);
+  if (!user) {
+    return res.status(404).json(new ApiResponse(false, "User not found"));
+  }
+  if(user.services.includes(services)){
+    return res.status(400).json(new ApiResponse(false, "Service already added"));
+  }
+  user.services.push(services);
+  if(services === "influencer"){
+    user.role = role
+  }
+  await user.save();
+  res.status(200).json(new ApiResponse(true, "Service added successfully",user));
+})
+
+
+
+// export const updateCreditofUser = asyncHandler(
+//   async (req: Request, res: Response) => {
+//     const { id, email, credit } = req.body;
+//     const user = await User.findById(id);
+//     if (!user) {
+//       return res
+//         .status(404)
+//         .json(new ApiResponse(false, "Invalid request or user not exist"));
+//     }
+//     if (user.credit.remainingCredit < credit) {
+//       return res.status(400).json(new ApiResponse(false, "your credit is ended!"));
+//     }
+//     user.credit.remainingCredit = user?.credit?.remainingCredit - credit;
+//     await user.save();
+//     res.status(200).json(new ApiResponse(true, "Token Deduct"));
+//   },
+// );
+
+// export const signUp = async (
+//   req: Request,
+//   res: Response,
+//   next: NextFunction,
+// ) => {
+//   try {
+//     const { name, email, password } = req.body;
+//     const existingUser = await User.findOne({ email });
+//     if (existingUser) {
+//       return res
+//         .status(409)
+//         .json(new ApiResponse(false, "Email Id is already exist"));
+//     }
+//     const hashedPassword = await bcrypt.hash(password, 10);
+//     const user = await User.create({ name, email, password: hashedPassword });
+//     const accessToken = generateAccessToken({
+//       id: user._id.toString(),
+//       email: user.email,
+//       clientId: user.clientId,
+//     });
+//     const refreshToken = generateRefreshToken({
+//       id: user._id.toString(),
+//       email: user.email,
+//       clientId: user.clientId,
+//     });
+//     setRefreshCookie(res, refreshToken);
+//     res.status(201).json({
+//       success: true,
+//       message: "User registered",
+//       accessToken,
+//       refreshToken,
+//       user: { id: user._id, name: user.name, email: user.email },
+//     });
+//   } catch (err) {
+//     next(err);
+//   }
+// };

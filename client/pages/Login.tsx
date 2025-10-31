@@ -84,11 +84,10 @@ export default function Login() {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <FormLabel>Email/Username</FormLabel>
                       <FormControl>
                         <Input
-                          placeholder="you@example.com"
-                          type="email"
+                          placeholder="you@example.com/yourusername"
                           {...field}
                         />
                       </FormControl>
