@@ -50,6 +50,7 @@ export default function Login() {
       const payload = { email: values.email, password: values.password };
       const res = await dispatch(signIn(payload));
       localStorage.setItem("refreshtoken", res?.payload?.refreshToken);
+      localStorage.setItem("user",JSON.stringify(res?.payload?.user))
       if (
         res.meta?.requestStatus === "fulfilled" &&
         res?.payload?.success === true

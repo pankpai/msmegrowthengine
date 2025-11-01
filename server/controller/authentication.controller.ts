@@ -156,6 +156,18 @@ export const handleGetuserInfo = asyncHandler(
   },
 );
 
+
+//  Get multiple user info....
+export const handleGetMultipleUserInfo = asyncHandler(
+  async (req: Request, res: Response) => {
+    const { userIds } = req.body;
+    const users = await User.find({ _id: { $in: userIds } }).select(
+      "-__v -createdAt -updatedAt",
+    );
+    res.status(200).json(new ApiResponse(true, "", users));
+  },
+);
+
 export const signOut = asyncHandler(async (req: Request, res: Response) => {
   res.clearCookie("refreshToken", {
     httpOnly: true,

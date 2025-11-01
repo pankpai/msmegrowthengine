@@ -1,16 +1,24 @@
+import { useAuth } from "@/hooks/use-auth";
 import React, { useEffect, useRef } from "react";
 
 const InfluencerServiceFrame: React.FC = () => {
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const userToken = localStorage.getItem("refreshtoken");
-
+  const user = JSON.parse(localStorage.getItem("user")||"{}")
   useEffect(() => {
     const iframe = iframeRef.current;
     if (iframe && userToken) {
       iframe.onload = () => {
-        iframe.contentWindow?.postMessage(
-          { type: "AUTH_TOKEN", token: userToken },
-          "http://localhost:8081"
+        const target = iframe.contentWindow;
+        target?.postMessage(
+          {
+            type: "INIT_DATA",
+            payload: {
+              token: userToken,
+              user,
+            },
+          },
+          "http://localhost:8081",
         );
       };
     }

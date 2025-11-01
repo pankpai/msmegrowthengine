@@ -37,7 +37,6 @@ export default function SignUp() {
   const navigate = useNavigate();
   const services = watch("services");
 
-
   const onSubmit = async (data: SignUpFormData) => {
     setServerError(null);
     if (data.password !== data.confirmPassword) {
@@ -45,9 +44,9 @@ export default function SignUp() {
       return;
     }
     try {
-      if(data.services==="review-sentiment"){
-        if(data.role){
-          delete data.role
+      if (data.services === "review-sentiment") {
+        if (data.role) {
+          delete data.role;
         }
       }
       const res = await dispatch(signUp(data));
@@ -92,10 +91,11 @@ export default function SignUp() {
               <Input
                 type="text"
                 {...register("name", { required: "Name is required" })}
-                className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans ${errors.name
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-200 hover:border-purple-200 focus:bg-white"
-                  }`}
+                className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans ${
+                  errors.name
+                    ? "border-red-500 bg-red-50"
+                    : "border-gray-200 hover:border-purple-200 focus:bg-white"
+                }`}
                 placeholder="Enter your full name"
                 autoComplete="name"
               />
@@ -118,7 +118,7 @@ export default function SignUp() {
                 <Mail className="h-5 w-5 text-gray-400" />
               </div>
               <Input
-                type="email"
+                type="text"
                 {...register("email", {
                   required: "Email is required",
                   pattern: {
@@ -126,10 +126,11 @@ export default function SignUp() {
                     message: "Invalid email address",
                   },
                 })}
-                className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans ${errors.email
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-200 hover:border-purple-200 focus:bg-white"
-                  }`}
+                className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans ${
+                  errors.email
+                    ? "border-red-500 bg-red-50"
+                    : "border-gray-200 hover:border-purple-200 focus:bg-white"
+                }`}
                 placeholder="Enter your email address"
                 autoComplete="email"
               />
@@ -154,10 +155,11 @@ export default function SignUp() {
 
               <select
                 {...register("services", { required: "Service is required" })}
-                className={`w-full pl-10 pr-4 py-2 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans appearance-none ${errors.role
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-200 hover:border-purple-200 focus:bg-white"
-                  }`}
+                className={`w-full pl-10 pr-4 py-2 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans appearance-none ${
+                  errors.role
+                    ? "border-red-500 bg-red-50"
+                    : "border-gray-200 hover:border-purple-200 focus:bg-white"
+                }`}
                 defaultValue=""
               >
                 <option value="" disabled>
@@ -175,37 +177,40 @@ export default function SignUp() {
             )}
           </div>
 
-          {services === 'influencer' && <div>
-            <label className="block text-sm font-semibold text-gray-700 mb-2 font-sans">
-              Select Role
-            </label>
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <User className="h-5 w-5 text-gray-400" />
-              </div>
+          {services === "influencer" && (
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-2 font-sans">
+                Select Role
+              </label>
+              <div className="relative">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
 
-              <select
-                {...register("role", { required: "Role is required" })}
-                className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans appearance-none ${errors.role
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-200 hover:border-purple-200 focus:bg-white"
+                <select
+                  {...register("role", { required: "Role is required" })}
+                  className={`w-full pl-10 pr-4 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans appearance-none ${
+                    errors.role
+                      ? "border-red-500 bg-red-50"
+                      : "border-gray-200 hover:border-purple-200 focus:bg-white"
                   }`}
-                defaultValue=""
-              >
-                <option value="" disabled>
-                  Select your role
-                </option>
-                <option value="brand">Brand</option>
-                <option value="influencer">Influencer</option>
-              </select>
+                  defaultValue=""
+                >
+                  <option value="" disabled>
+                    Select your role
+                  </option>
+                  <option value="brand">Brand</option>
+                  <option value="influencer">Influencer</option>
+                </select>
+              </div>
+              {errors.role && (
+                <p className="text-red-500 text-xs mt-1 ml-1 font-sans flex items-center">
+                  <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
+                  {errors.role.message}
+                </p>
+              )}
             </div>
-            {errors.role && (
-              <p className="text-red-500 text-xs mt-1 ml-1 font-sans flex items-center">
-                <span className="w-1 h-1 bg-red-500 rounded-full mr-2"></span>
-                {errors.role.message}
-              </p>
-            )}
-          </div>}
+          )}
 
           {/* Password */}
           <div>
@@ -225,10 +230,11 @@ export default function SignUp() {
                     message: "Password must be at least 6 characters",
                   },
                 })}
-                className={`w-full pl-10 pr-12 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans ${errors.password
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-200 hover:border-purple-200 focus:bg-white"
-                  }`}
+                className={`w-full pl-10 pr-12 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans ${
+                  errors.password
+                    ? "border-red-500 bg-red-50"
+                    : "border-gray-200 hover:border-purple-200 focus:bg-white"
+                }`}
                 placeholder="Enter your password"
                 autoComplete="new-password"
               />
@@ -269,10 +275,11 @@ export default function SignUp() {
                   validate: (value) =>
                     value === watch("password") || "Passwords do not match",
                 })}
-                className={`w-full pl-10 pr-12 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans ${errors.confirmPassword
-                  ? "border-red-500 bg-red-50"
-                  : "border-gray-200 hover:border-purple-200 focus:bg-white"
-                  }`}
+                className={`w-full pl-10 pr-12 py-3 border-2 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-200 font-sans ${
+                  errors.confirmPassword
+                    ? "border-red-500 bg-red-50"
+                    : "border-gray-200 hover:border-purple-200 focus:bg-white"
+                }`}
                 placeholder="Confirm your password"
                 autoComplete="new-password"
               />
